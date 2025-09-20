@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Weather App</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-weight: 600;
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .app-content {
+            padding: 25px;
+        }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #3a7bd5;
+            box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.2);
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+            color: white;
+            border: none;
+            width: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+        
+        .search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(58, 123, 213, 0.4);
+        }
+        
+        .weather-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .city-name {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .weather-icon {
+            font-size: 64px;
+            margin: 15px 0;
+            color: #3a7bd5;
+        }
+        
+        .temperature {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .weather-description {
+            font-size: 20px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .forecast {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .forecast-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .forecast-day {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .forecast-icon {
+            font-size: 24px;
+            margin: 8px 0;
+            color: #3a7bd5;
+        }
+        
+        .forecast-temp {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+            background: #ffebee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #7f8c8d;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 600px) {
+            .weather-details, .forecast {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .app-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // React Components
+        const { useState, useEffect } = React;
+
+        // Weather Icon Component
+        function WeatherIcon({ condition }) {
+            const iconMap = {
+                'clear': 'fa-sun',
+                'clouds': 'fa-cloud',
+                'rain': 'fa-cloud-rain',
+                'snow': 'fa-snowflake',
+                'thunderstorm': 'fa-bolt',
+                'drizzle': 'fa-cloud-drizzle',
+                'mist': 'fa-smog',
+                'smoke': 'fa-smog',
+                'haze': 'fa-smog',
+                'dust': 'fa-smog',
+                'fog': 'fa-smog',
+                'sand': 'fa-smog',
+                'ash': 'fa-smog',
+                'squall': 'fa-wind',
+                'tornado': 'fa-tornado'
+            };
+            
+            const defaultIcon = 'fa-cloud';
+            const iconClass = iconMap[condition] || defaultIcon;
+            
+            return <i className={`fas ${iconClass} weather-icon`}></i>;
+        }
+
+        // Weather Detail Component
+        function WeatherDetail({ label, value, unit }) {
+            return (
+                <div className="detail-item">
+                    <span className="detail-label">{label}</span>
+                    <span className="detail-value">{value}{unit}</span>
+                </div>
+            );
+        }
+
+        // Forecast Item Component
+        function ForecastItem({ day, condition, temp }) {
+            return (
+                <div className="forecast-item">
+                    <div className="forecast-day">{day}</div>
+                    <WeatherIcon condition={condition} />
+                    <div className="forecast-temp">{temp}°C</div>
+                </div>
+            );
+        }
+
+        // Main Weather Component
+        function WeatherApp() {
+            const [weatherData, setWeatherData] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [city, setCity] = useState('London');
+            
+            // Mock weather data since we can't make real API calls from HTML file
+            const mockWeatherData = {
+                city: city,
+                temperature: Math.round(Math.random() * 30 + 5),
+                condition: ['clear', 'clouds', 'rain', 'snow'][Math.floor(Math.random() * 4)],
+                description: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
+                humidity: Math.round(Math.random() * 50 + 30),
+                wind: Math.round(Math.random() * 30 + 5),
+                pressure: Math.round(Math.random() * 200 + 1000)
+            };
+            
+            // Mock forecast data
+            const mockForecast = [
+                { day: 'Mon', condition: 'clear', temp: Math.round(Math.random() * 30 + 5) },
+                { day: 'Tue', condition: 'clouds', temp: Math.round(Math.random() * 30 + 5) },
+                { day: 'Wed', condition: 'rain', temp: Math.round(Math.random() * 30 + 5) }
+            ];
+            
+            const fetchWeather = () => {
+                setLoading(true);
+                setError(null);
+                
+                // Simulate API call with setTimeout
+                setTimeout(() => {
+                    setWeatherData(mockWeatherData);
+                    setLoading(false);
+                }, 1000);
+            };
+            
+            useEffect(() => {
+                fetchWeather();
+            }, []);
+            
+            const handleSearch = (e) => {
+                e.preventDefault();
+                if (city.trim() !== '') {
+                    fetchWeather();
+                }
+            };
+            
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1><i className="fas fa-cloud-sun"></i> React Weather App</h1>
+                        <p>Check weather conditions around the world</p>
+                    </div>
+                    
+                    <div className="app-content">
+                        <form onSubmit={handleSearch} className="search-container">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Enter city name..."
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                            />
+                            <button type="submit" className="search-btn">
+                                <i className="fas fa-search"></i>
+                            </button>
+                        </form>
+                        
+                        {error && (
+                            <div className="error">
+                                <i className="fas fa-exclamation-circle"></i> {error}
+                            </div>
+                        )}
+                        
+                        {loading ? (
+                            <div className="loading">
+                                <i className="fas fa-spinner fa-spin"></i>
+                                <p>Loading weather data...</p>
+                            </div>
+                        ) : weatherData ? (
+                            <>
+                                <div className="weather-card">
+                                    <h2 className="city-name">{weatherData.city}</h2>
+                                    <WeatherIcon condition={weatherData.condition} />
+                                    <div className="temperature">{weatherData.temperature}°C</div>
+                                    <div className="weather-description">{weatherData.description}</div>
+                                    
+                                    <div className="weather-details">
+                                        <WeatherDetail label="Humidity" value={weatherData.humidity} unit="%" />
+                                        <WeatherDetail label="Wind Speed" value={weatherData.wind} unit=" km/h" />
+                                        <WeatherDetail label="Pressure" value={weatherData.pressure} unit=" hPa" />
+                                        <WeatherDetail label="Feels Like" value={weatherData.temperature + 2} unit="°C" />
+                                    </div>
+                                </div>
+                                
+                                <h3 style={{ marginBottom: '15px', color: '#2c3e50' }}>3-Day Forecast</h3>
+                                <div className="forecast">
+                                    {mockForecast.map((item, index) => (
+                                        <ForecastItem 
+                                            key={index}
+                                            day={item.day}
+                                            condition={item.condition}
+                                            temp={item.temp}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        ) : null}
+                    </div>
+                    
+                    <div className="footer">
+                        <p>Built with React - Data is simulated for demonstration purposes</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the App
+        ReactDOM.createRoot(document.getElementById('root')).render(<WeatherApp />);
+    </script>
+</body>
+</html>
